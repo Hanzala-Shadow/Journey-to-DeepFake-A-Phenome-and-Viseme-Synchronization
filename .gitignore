@@ -1,0 +1,16 @@
+# Python cache
+__pycache__/
+
+# Virtual environment
+venv/
+
+# Node modules
+node_modules/
+
+# Large generated files
+input/
+output/
+temp/
+
+# Secrets
+.env
