@@ -18,11 +18,16 @@ AZURE_VOICE_NAME    = "en-US-GuyNeural"   # Male voice
 # -- File Paths -----------------------------------------------------------------
 INPUT_FACE    = "input/face.jpg"
 INPUT_SCRIPT  = "input/script.txt"
+SPRITE_DIR    = "input/sprites/"
 
 OUTPUT_AUDIO      = "output/audio.mp3"
 OUTPUT_VISEMES    = "output/visemes.json"
 OUTPUT_TEMP_VIDEO = "output/temp_video.mp4"
 OUTPUT_VIDEO      = "output/result.mp4"
+
+# Ensure directories exist since they are gitignored
+os.makedirs("input/sprites", exist_ok=True)
+os.makedirs("output", exist_ok=True)
 
 # -- Video Settings -------------------------------------------------------------
 VIDEO_FPS    = 30

@@ -72,11 +72,13 @@ CHIN_MOVERS = [152, 148, 176, 149, 150, 136, 172, 58, 132, 93, 234, 127, 162, 21
                200, 199, 175, 152]
 
 # Static anchor points to prevent the upper face/eyes/nose from moving (by default)
-# We also include the eye points here so they are part of the active warp mesh,
-# allowing us to procedurally blink them!
+# We also include the eye and eyebrow points here so they are part of the active warp mesh,
+# allowing us to procedurally blink and animate them!
 STATIC_ANCHORS = [4, 6, 8, 9, 33, 263, 10, 151, 109, 338,
                   # Eyes
-                  159, 160, 158, 145, 144, 153, 386, 385, 387, 374, 380, 373]
+                  159, 160, 158, 145, 144, 153, 386, 385, 387, 374, 380, 373,
+                  # Eyebrows
+                  70, 63, 105, 66, 107, 300, 293, 334, 296, 336]
 
 # Lip corner indices (move horizontally for wide/narrow shapes)
 LIP_CORNERS = [61, 291]

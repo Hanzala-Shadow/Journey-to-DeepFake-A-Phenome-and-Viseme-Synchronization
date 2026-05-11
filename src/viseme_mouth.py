@@ -134,35 +134,61 @@ def compute_deformed_landmarks(
         lms[idx][0] = int(orig_x + offset)
 
     # -- Procedural Animation (Breathing & Blinking) ---------------------------
-    # 1. Breathing (global slow bobbing)
-    breath_shift = math.sin(frame_idx * 0.08) * 3.0  # 3 pixels up/down
+    import random
+    time_sec = frame_idx / 30.0
+
+    # 1. Natural Head Movement (pseudo-random drift)
+    # Combine prime-frequency sine waves for natural, non-repeating movement
+    yaw_drift   = math.sin(time_sec * 0.73) + 0.5 * math.sin(time_sec * 1.37)
+    pitch_drift = math.sin(time_sec * 0.59) + 0.5 * math.sin(time_sec * 1.13)
+    
+    # Apply uniformly to avoid tearing the piecewise affine mesh
+    shift_x = int(yaw_drift * 2.5)
+    shift_y = int(pitch_drift * 2.5)
     for pt in lms:
-        pt[1] += int(breath_shift)
+        pt[0] += shift_x
+        pt[1] += shift_y
 
-    # 2. Eye Blinking (every ~120 frames, close for 6 frames)
-    blink_cycle = frame_idx % 150
+    # 2. Natural Eye Blinking
+    # Trigger a blink roughly once every 4 seconds, deterministically based on time
+    window_idx = int(time_sec / 4.0)
+    random.seed(window_idx * 12345)
+    blink_time = (window_idx * 4.0) + random.uniform(0.5, 3.5)
+    
+    # A blink lasts ~0.2 seconds (0.1s close, 0.1s open)
+    diff = abs(time_sec - blink_time)
     blink_amt = 0.0
-    if blink_cycle < 6:
-        blink_amt = math.sin((blink_cycle / 6.0) * math.pi)  # 0.0 -> 1.0 -> 0.0
+    if diff < 0.1:
+        # Smooth cosine curve for the blink
+        blink_amt = math.cos((diff / 0.1) * (math.pi / 2))
+        blink_amt = blink_amt * blink_amt # Ease in/out
 
-    if blink_amt > 0.0:
-        # Approximate eyelid points
-        LEFT_EYE_TOP = [159, 160, 158]
-        LEFT_EYE_BOT = [145, 144, 153]
+    if blink_amt > 0.01:
+        LEFT_EYE_TOP  = [159, 160, 158]
+        LEFT_EYE_BOT  = [145, 144, 153]
         RIGHT_EYE_TOP = [386, 385, 387]
         RIGHT_EYE_BOT = [374, 380, 373]
+        LEFT_BROW     = [70, 63, 105, 66, 107]
+        RIGHT_BROW    = [300, 293, 334, 296, 336]
 
-        # In dense warping, we need to include these eye points in the active indices
-        # We will add them to STATIC_ANCHORS in face_mesh.py so they are part of the warp
+        # In a real blink, the upper lid moves down a lot (80%), lower lid moves up a bit (20%)
+        # And the eyebrows dip slightly.
+        
+        # Left Eye
         for top, bot in zip(LEFT_EYE_TOP, LEFT_EYE_BOT):
-            mid_y = (lms[top][1] + lms[bot][1]) / 2.0
-            lms[top][1] = int(lms[top][1] * (1.0 - blink_amt) + mid_y * blink_amt)
-            lms[bot][1] = int(lms[bot][1] * (1.0 - blink_amt) + mid_y * blink_amt)
+            close_y = lms[bot][1] * 0.2 + lms[top][1] * 0.8
+            lms[top][1] = int(lms[top][1] * (1.0 - blink_amt) + close_y * blink_amt)
+            lms[bot][1] = int(lms[bot][1] * (1.0 - blink_amt) + close_y * blink_amt)
+        for brow in LEFT_BROW:
+            lms[brow][1] += int(3.0 * blink_amt)
 
+        # Right Eye
         for top, bot in zip(RIGHT_EYE_TOP, RIGHT_EYE_BOT):
-            mid_y = (lms[top][1] + lms[bot][1]) / 2.0
-            lms[top][1] = int(lms[top][1] * (1.0 - blink_amt) + mid_y * blink_amt)
-            lms[bot][1] = int(lms[bot][1] * (1.0 - blink_amt) + mid_y * blink_amt)
+            close_y = lms[bot][1] * 0.2 + lms[top][1] * 0.8
+            lms[top][1] = int(lms[top][1] * (1.0 - blink_amt) + close_y * blink_amt)
+            lms[bot][1] = int(lms[bot][1] * (1.0 - blink_amt) + close_y * blink_amt)
+        for brow in RIGHT_BROW:
+            lms[brow][1] += int(3.0 * blink_amt)
 
     return lms
 

@@ -115,8 +115,8 @@ if __name__ == "__main__":
         help="[Main loop] Render lip-synced hologram video",
     )
     parser.add_argument(
-        "--no-hologram", action="store_true",
-        help="Skip cyan tint/scanlines (raw mouth animation only -- useful for tuning)",
+        "--hologram", action="store_true",
+        help="Apply cyan tint, scanlines, and edge glow (hologram effect)",
     )
 
     args = parser.parse_args()
@@ -129,4 +129,4 @@ if __name__ == "__main__":
         run_tts()
 
     if args.render:
-        run_render(hologram=not args.no_hologram)
+        run_render(hologram=args.hologram)

@@ -19,6 +19,7 @@ import config
 from src.face_mesh import get_landmarks
 from src.renderer import render_frame
 from src.viseme_mouth import compute_deformed_landmarks
+from src.sprite_manager import load_sprites, get_sprite_for_viseme
 
 
 
@@ -91,8 +92,9 @@ def run(
     # -- Step 2: viseme timeline ------------------------------------------------
     print("[Assembler] Loading viseme timeline...")
     events = load_visemes(viseme_path)
-    print(f"[Assembler]   {len(events)} events  |  "
-          f"span: 0 - {events[-1]['time_ms']}ms")
+    print(f"[Assembler]   {len(events)} events  |  span: {events[0]['time_ms']} - {events[-1]['time_ms']}ms")
+
+    sprites = load_sprites()
 
     # -- Step 3: frame count from audio ----------------------------------------
     print("[Assembler] Reading audio duration...")
@@ -111,8 +113,15 @@ def run(
 
         vis_a, vis_b, t = get_viseme_state(time_ms, events)
         deformed        = compute_deformed_landmarks(base_lms, vis_a, vis_b, t, frame_idx=idx)
-        frame           = render_frame(base_img, base_lms, deformed,
-                                       apply_hologram=hologram, frame_idx=idx)
+        sprite_a        = get_sprite_for_viseme(vis_a, sprites)
+        sprite_b        = get_sprite_for_viseme(vis_b, sprites)
+        
+        # Smooth the blend curve for texture crossfading (same as the mesh deformation)
+        t_smooth = t * t * (3 - 2 * t)
+        
+        frame = render_frame(base_img, base_lms, deformed, 
+                             sprite_a=sprite_a, sprite_b=sprite_b, t_blend=t_smooth,
+                             apply_hologram=hologram, frame_idx=idx)
         writer.write(frame)
 
         # Progress every second of video
