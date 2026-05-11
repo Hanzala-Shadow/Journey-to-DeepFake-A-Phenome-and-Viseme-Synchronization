@@ -1,0 +1,5 @@
+azure-cognitiveservices-speech==1.38.0
+mediapipe==0.10.35
+opencv-python>=4.9.0
+moviepy==1.0.3
+numpy>=1.26.0
