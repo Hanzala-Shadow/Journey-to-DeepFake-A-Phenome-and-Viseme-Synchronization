@@ -8,8 +8,6 @@ venv/
 node_modules/
 
 # Large generated files
-input/
-output/
 temp/
 
 # Secrets

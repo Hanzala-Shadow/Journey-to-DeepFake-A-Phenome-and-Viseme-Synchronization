@@ -190,7 +190,7 @@ def _synthesize_pyttsx3(text: str, audio_out: str, voice_index: int = 0):
 
 def _synthesize_gtts(text: str, audio_out: str):
     """
-    Generate speech using Google TTS (free, needs internet).
+    Generate speech using Google TTS.
     Saves directly as MP3.
     """
     try:
@@ -206,19 +206,46 @@ def _synthesize_gtts(text: str, audio_out: str):
     return audio_out
 
 
+# -- Audio backend: Edge TTS ----------------------------------------------------
+
+def _synthesize_edge(text: str, audio_out: str):
+    """
+    Generate speech using Microsoft Edge Neural TTS.
+    Saves directly as MP3.
+    """
+    import subprocess
+    import sys
+    os.makedirs(os.path.dirname(audio_out) or ".", exist_ok=True)
+    
+    # Check if edge-tts is installed
+    try:
+        # Use ChristopherNeural (excellent male voice) or GuyNeural
+        voice = "en-US-ChristopherNeural" 
+        cmd = [sys.executable, "-m", "edge_tts", "--text", text, "--voice", voice, "--write-media", audio_out]
+        subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print(f"[LocalTTS] Audio saved -> {audio_out}")
+    except FileNotFoundError:
+        print("[LocalTTS] edge-tts not found -- run:  pip install edge-tts")
+        sys.exit(1)
+    except subprocess.CalledProcessError as e:
+        print(f"[LocalTTS] edge-tts failed: {e.stderr.decode()}")
+        sys.exit(1)
+        
+    return audio_out
+
+
 # -- Public API -----------------------------------------------------------------
 
 def synthesize(script_text: str, audio_out: str, viseme_out: str,
                backend: str = "pyttsx3"):
     """
-    Drop-in replacement for tts_azure.synthesize().
-    Generates audio + visemes.json without any API key.
+    Generates audio + visemes.json.
 
     Args:
         script_text : text to speak
         audio_out   : path for audio file (mp3 or wav depending on backend)
         viseme_out  : path for visemes.json
-        backend     : "pyttsx3" (local) or "gtts" (Google, free internet)
+        backend     : "pyttsx3" (local), "gtts" (Google), or "edge" (Edge Neural)
 
     Returns:
         (actual_audio_path, viseme_events list)
@@ -231,8 +258,10 @@ def synthesize(script_text: str, audio_out: str, viseme_out: str,
         actual_audio = _synthesize_pyttsx3(script_text, audio_out)
     elif backend == "gtts":
         actual_audio = _synthesize_gtts(script_text, audio_out)
+    elif backend == "edge":
+        actual_audio = _synthesize_edge(script_text, audio_out)
     else:
-        print(f"[LocalTTS] Unknown backend '{backend}'. Use 'pyttsx3' or 'gtts'.")
+        print(f"[LocalTTS] Unknown backend '{backend}'. Use 'pyttsx3', 'gtts', or 'edge'.")
         sys.exit(1)
 
     # -- Get audio duration ----------------------------------------------------

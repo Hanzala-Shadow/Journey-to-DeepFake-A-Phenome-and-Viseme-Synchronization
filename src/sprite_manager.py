@@ -4,36 +4,36 @@ import cv2
 import config
 from src.face_mesh import get_landmarks
 
-# Mapping of standard 22 Viseme IDs to our 3 basic sprite categories
-# None means "use default mesh deformation without a sprite" (good for closed/silent/consonants)
+# Mapping of 22 Azure Visemes to the 15 Standard Oculus/MPEG-4 Viseme shapes
+# Missing sprites will default to None (geometric mesh cavity deformation).
 VISEME_TO_SPRITE_BUCKET = {
-    0:  None,       # silence
-    1:  "teeth",    # ae, ah
-    2:  "open",     # aa
-    3:  "open",     # ao
-    4:  "teeth",    # eh, ey
-    5:  "teeth",    # er
-    6:  "teeth",    # ih, iy
-    7:  "pucker",   # uh, uw, w
-    8:  "pucker",   # ow
-    9:  "open",     # aw
-    10: "pucker",   # oy
-    11: "teeth",    # ay
-    12: None,       # h
-    13: "pucker",   # r
-    14: "pucker",   # l
-    15: "teeth",    # s, z
-    16: "teeth",    # sh, ch, jh, zh
-    17: "teeth",    # th, dh
-    18: "teeth",    # f, v
-    19: None,       # d, t, n (mostly closed)
-    20: None,       # k, g, ng (mostly closed)
-    21: None,       # p, b, m (closed)
+    0:  "sil",      # silence
+    1:  "e",        # uh / schwa (eh, uh)
+    2:  "aa",       # ah (wide open)
+    3:  "o",        # aw (open round)
+    4:  "e",        # eh (half open)
+    5:  "rr",       # er
+    6:  "i",        # ee (wide smile)
+    7:  "u",        # oo (puckered)
+    8:  "o",        # oh (round)
+    9:  "aa",       # ow
+    10: "o",        # oy
+    11:  "aa",      # ay
+    12: "kk",       # h
+    13: "rr",       # r
+    14: "nn",       # l
+    15: "ss",       # s, z
+    16: "ch",       # sh, ch, jh, zh
+    17: "th",       # th, dh
+    18: "ff",       # f, v
+    19: "dd",       # d, t, n
+    20: "kk",       # k, g, ng
+    21: "pp",       # p, b, m
 }
 
 def load_sprites() -> dict:
     """
-    Scans the SPRITE_DIR for open.jpg, teeth.jpg, and pucker.jpg.
+    Scans the SPRITE_DIR for the 15 standard viseme images.
     For each, it detects landmarks and stores them.
     Returns: { "bucket_name": {"img": np.ndarray, "lms": list} }
     """
@@ -43,7 +43,13 @@ def load_sprites() -> dict:
         print(f"[SpriteManager] Directory {config.SPRITE_DIR} not found. Running without sprites.")
         return sprites
 
-    for bucket in ["open", "teeth", "pucker"]:
+    # The 15 standard Oculus shapes based on ArtStation reference
+    viseme_buckets = [
+        "sil", "pp", "ff", "th", "dd", "kk", "ch", "ss", 
+        "nn", "rr", "aa", "e", "i", "o", "u"
+    ]
+
+    for bucket in viseme_buckets:
         path = os.path.join(config.SPRITE_DIR, f"{bucket}.jpg")
         if os.path.exists(path):
             try:

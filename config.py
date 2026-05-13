@@ -1,11 +1,12 @@
 import os
 
 # -- TTS Mode -------------------------------------------------------------------
-# Choose how to generate audio + viseme timing:
-#   "pyttsx3" -> Windows SAPI voice (100% local, no internet, no key) <- default
-#   "gtts"    -> Google TTS (free, needs internet, better voice quality)
-#   "azure"   -> Azure Cognitive Services (best accuracy, needs API key)
-TTS_MODE = "pyttsx3"   # <- change this one line to switch mode
+# Supported TTS Engines:
+#   "pyttsx3" -> Windows SAPI (Local, default)
+#   "gtts"    -> Google TTS (Cloud)
+#   "edge"    -> Microsoft Edge Neural TTS (Cloud)
+#   "azure"   -> Azure Cognitive Services (Cloud, requires API key)
+TTS_MODE = "edge"
 
 # Use faster-whisper for exact word-level timing (highly recommended for local TTS)
 USE_WHISPER_ALIGN = True

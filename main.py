@@ -48,7 +48,7 @@ def run_tts():
             audio_out=config.OUTPUT_AUDIO,
             viseme_out=config.OUTPUT_VISEMES,
         )
-    elif mode in ("pyttsx3", "gtts"):
+    elif mode in ("pyttsx3", "gtts", "edge"):
         actual_audio, _ = local_synthesize(
             script_text=script_text,
             audio_out=config.OUTPUT_AUDIO,   # may become .wav for pyttsx3
@@ -59,7 +59,7 @@ def run_tts():
         config.OUTPUT_AUDIO = actual_audio
     else:
         print(f"[ERROR] Unknown TTS_MODE '{mode}' in config.py")
-        print("        Valid options: 'pyttsx3', 'gtts', 'azure'")
+        print("        Valid options: 'pyttsx3', 'gtts', 'edge', 'azure'")
         sys.exit(1)
 
 
